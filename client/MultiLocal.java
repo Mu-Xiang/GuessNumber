@@ -35,6 +35,7 @@ public class MultiLocal extends JFrame {
 	private static MultiLocal frame1;
 	private static MultiLocal frame2;
 	private int recordCounter;
+	private boolean timePause = false;
 	private boolean isGameEnd;
 
 	//gui
@@ -69,7 +70,7 @@ public class MultiLocal extends JFrame {
 					//player 1
 					frame1 = new MultiLocal();
 					frame1.setVisible(true);
-					frame1.setTitle(proName);
+					frame1.setTitle(proName + " Player 1");
 					frame1.setSize(540, 480);
 					frame1.setResizable(false);
 					Dimension screensize1 = Toolkit.getDefaultToolkit().getScreenSize();
@@ -78,7 +79,7 @@ public class MultiLocal extends JFrame {
 					//player 2
 					frame2 = new MultiLocal();
 					frame2.setVisible(true);
-					frame2.setTitle(proName);
+					frame2.setTitle(proName + " Player 2");
 					frame2.setSize(540, 480);
 					frame2.setResizable(false);
 					Dimension screensize2 = Toolkit.getDefaultToolkit().getScreenSize();
@@ -175,33 +176,38 @@ public class MultiLocal extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					//send data : 4 number
-					dout.writeInt((int)spinner1.getValue());
-					dout.writeInt((int)spinner2.getValue());
-					dout.writeInt((int)spinner3.getValue());
-					dout.writeInt((int)spinner4.getValue());
-					
-					//read data : A B
-					int a = din.readInt();
-					int b = din.readInt();
-					lbAB.setText(a + " A " + b + " B");
-					textAreaRecord.setText(textAreaRecord.getText() + " " + ++recordCounter + ". " + 
-										   (int)spinner1.getValue() + (int)spinner2.getValue() + (int)spinner3.getValue() + (int)spinner4.getValue() + 
-										   " -> " + lbAB.getText() + "\n");
-					if (a == 4 && b == 0) {
-						isGameEnd = true;
-						btAgain.setVisible(true);
+					if (!timePause) {
+						btSubmit.setEnabled(true);
+						dout.writeInt((int)spinner1.getValue());
+						dout.writeInt((int)spinner2.getValue());
+						dout.writeInt((int)spinner3.getValue());
+						dout.writeInt((int)spinner4.getValue());
+						System.out.println("Send");
+						//read data : A B
+						int a = din.readInt();
+						int b = din.readInt();
+						lbAB.setText(a + " A " + b + " B");
+						textAreaRecord.setText(textAreaRecord.getText() + " " + ++recordCounter + ". " + 
+											   (int)spinner1.getValue() + (int)spinner2.getValue() + (int)spinner3.getValue() + (int)spinner4.getValue() + 
+											   " -> " + lbAB.getText() + "\n");
 						btSubmit.setEnabled(false);
-						spinner1.setEnabled(false);
-						spinner2.setEnabled(false);
-						spinner3.setEnabled(false);
-						spinner4.setEnabled(false);
-						lbAB.setForeground(Color.RED);
+						if (a == 4 && b == 0) {
+							isGameEnd = true;
+							btAgain.setVisible(true);
+							spinner1.setEnabled(false);
+							spinner2.setEnabled(false);
+							spinner3.setEnabled(false);
+							spinner4.setEnabled(false);
+							lbAB.setForeground(Color.RED);
+						}
+						new Thread(new TimePauseThread()).start();
 					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			}
 		});
+		btSubmit.setEnabled(false);
 		btSubmit.setFont(new Font("Times New Roman", Font.PLAIN, 16));
 		btSubmit.setBounds(130, 280, 80, 25);
 		desktopPane.add(btSubmit);
@@ -241,7 +247,8 @@ public class MultiLocal extends JFrame {
 		//Thread
 		new Thread(new TimerThread()).start();
 		new Thread(new ServerThread()).start();
-		new Thread(new GameThread()).start();
+		new Thread(new GameStartThread()).start();
+		new Thread(new TimePauseThread()).start();
 	}
 
 	private void startGame() throws IOException {
@@ -250,15 +257,26 @@ public class MultiLocal extends JFrame {
         dout = new DataOutputStream(s.getOutputStream());
 	}
 	
+	public boolean isTimePause() {
+		return timePause;
+	}
+
+	public void setTimePause(boolean timePause) {
+		this.timePause = timePause;
+	}
+
 	private class TimerThread implements Runnable {
 		public void run() {
 			while (true) {
 				try {
-					Thread.sleep(1000);
-					timer++;
-					String timerText = "Timer  " + (((timer / 60) < 10) ? "0" : "") + (timer / 60) + " : " + (((timer % 60) < 10) ? "0" : "") + (timer % 60);
-					lbTimer.setText(timerText);
-					if (isGameEnd) break;
+					if (!timePause) {
+						btSubmit.setEnabled(true);
+						Thread.sleep(1000);
+						timer++;
+						String timerText = "Timer  " + (((timer / 60) < 10) ? "0" : "") + (timer / 60) + " : " + (((timer % 60) < 10) ? "0" : "") + (timer % 60);
+						lbTimer.setText(timerText);
+						if (isGameEnd) break;
+					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -279,18 +297,34 @@ public class MultiLocal extends JFrame {
 		}
 	}
 	
-	private class GameThread implements Runnable {
+	private class GameStartThread implements Runnable {
 		public void run() {
 			while (true) {
 				try {
 					Thread.sleep(100);
 					frame1.startGame();
-					break;
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				break;
+			}
+		}
+	}
+	
+	private class TimePauseThread implements Runnable {
+		public void run() {
+			while (true) {
+				try {
+					if (!timePause) {
+						timePause = din.readBoolean();
+						break;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
 			}
 		}
 	}

@@ -91,7 +91,7 @@ public class SingleServer {
     private int port = 8000;
     Socket s;
     public static void main(String[] args) throws IOException{
-        Server server = new Server();
+        SingleServer server = new SingleServer();
         server.startServer();
     }
 
@@ -101,7 +101,7 @@ public class SingleServer {
 
         while (isStart) {
             s = server.accept();
-            ServerThread serverThread = new ServerThread(s);
+            SingleServerThread serverThread = new SingleServerThread(s);
             serverThread.start();
         }
 

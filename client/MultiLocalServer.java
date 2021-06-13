@@ -10,57 +10,83 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class MultiLocalServerThread extends Thread {
-	private String name;
 	private static int connectCounter = 0;
 	private static int historyConnector = 0;
 	private final int ans[] = new int[4];
 	
-	private Socket clientSocket;
-	private InputStream in;
-	private OutputStream out;
+	private String p1Name;
+	private String p2Name;
+	private Socket p1Socket;
+	private Socket p2Socket;
+	private InputStream p1In;
+	private InputStream p2In;
+	private OutputStream p1Out;
+	private OutputStream p2Out;
 	
-	public MultiLocalServerThread(Socket clientSocket) {
+	public MultiLocalServerThread(Socket p1Socket, Socket p2Socket) {
 		connectCounter++;
 		historyConnector++;
-		name = "Player" + historyConnector;
+		p1Name = "Player " + historyConnector;
+		p2Name = "Player " + historyConnector;
+		
 		for (int i = 0; i < 4; i++)
 			ans[i] = (int)(Math.random() * 10);
 		
-		this.clientSocket = clientSocket;
+		this.p1Socket = p1Socket;
+		this.p2Socket = p2Socket;
 		try {
-            in = this.clientSocket.getInputStream();
-            out = this.clientSocket.getOutputStream();
+            p1In = this.p1Socket.getInputStream();
+            p1Out = this.p1Socket.getOutputStream();
+            p2In = this.p2Socket.getInputStream();
+            p2Out = this.p2Socket.getOutputStream();
         } catch (IOException e) {
             Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, e);
         }
+		
+		System.out.println("Thread construct finish!");
 	}
 	
 	@Override
 	public void run() {
-		DataInputStream din = new DataInputStream(in);
-		DataOutputStream dout = new DataOutputStream(out);
+		DataInputStream p1Din = new DataInputStream(p1In);
+		DataOutputStream p1Dout = new DataOutputStream(p1Out);
+		DataInputStream p2Din = new DataInputStream(p2In);
+		DataOutputStream p2Dout = new DataOutputStream(p2Out);
 		
+		boolean bool = false;
 		while (true) {
 			int a = 0, b = 0;
 			int[] temp = new int[4];
 			try {
+				//return timePause boolean
+				p1Dout.writeBoolean(bool);
+				p2Dout.writeBoolean(!bool);
+				
+				//read number
 				int num[] = new int[4];
-				System.out.println("\nAnswer = " + ans[0] + ans[1] + ans[2] + ans[3]);
-				System.out.print("Input = ");
 				for (int i = 0; i < 4; i++) {
-					num[i] = din.readInt();
+					if (!bool)
+						num[i] = p1Din.readInt();
+					else
+						num[i] = p2Din.readInt();
 					temp[i] = ans[i];
-					System.out.print(num[i]);
-					if (num[i] == temp[i]) {
-						a++;
-						num[i] = -1;
-						temp[i] = -1;
-					}
 				}
-				System.out.println("");
+				
+				//server print
+				System.out.println("\nAnswer = " + ans[0] + ans[1] + ans[2] + ans[3]);
+				if (!bool) System.out.print(p1Name + " ");
+				else System.out.print(p2Name + " ");
+				System.out.print("Input = " + num[0] + num[1] + num[2] + num[3]);
+				
+				//a & b
 				for (int i = 0; i < 4; i++) {
 					for (int j = 0; j < 4; j++) {
-						if (i == j || (num[i] == -1 || temp[j] == -1)) continue;
+						if (i == j && num[i] == temp[j]) {
+							a++;
+							num[i] = -1;
+							temp[i] = -1;
+						}
+						else if (i == j || (num[i] == -1 || temp[j] == -1)) continue;
                         if (num[i] == temp[j]) {
                             b++;
                             num[i] = -1;
@@ -68,13 +94,18 @@ class MultiLocalServerThread extends Thread {
                         }
 					}
 				}
-				System.out.println(a + "A" + b + "B");
 				
-				//return data
-				dout.writeInt(a);
-				dout.writeInt(b);
+				//return a & b
+				if (!bool) {
+					p1Dout.writeInt(a);
+					p1Dout.writeInt(b);
+				} else {
+					p2Dout.writeInt(a);
+					p2Dout.writeInt(b);
+				}
+				bool = bool ? false : true;
 				
-				//close
+				//interrupt
 				if (a == 4 && b == 0) {
 					Thread.currentThread().interrupt();
 					break;
@@ -89,9 +120,10 @@ class MultiLocalServerThread extends Thread {
 public class MultiLocalServer {
 	private boolean isStart = true;
     private int port = 8000;
-    Socket s;
+    Socket p1;
+    Socket p2;
     public static void main(String[] args) throws IOException{
-        Server server = new Server();
+        MultiLocalServer server = new MultiLocalServer();
         server.startServer();
     }
 
@@ -100,19 +132,14 @@ public class MultiLocalServer {
         System.out.println("Server ready!");
 
         while (isStart) {
-            s = server.accept();
-            ServerThread serverThread = new ServerThread(s);
+            p1 = server.accept();
+            System.out.println("Player1 connect.");
+            p2 = server.accept();
+            System.out.println("Player2 connect.");
+            MultiLocalServerThread serverThread = new MultiLocalServerThread(p1, p2);
             serverThread.start();
         }
 
         System.out.println("Server closed!");
     }
-
-	public boolean isStart() {
-		return isStart;
-	}
-
-	public void setStart(boolean isStart) {
-		this.isStart = isStart;
-	}
 }

@@ -180,6 +180,7 @@ public class HomePage extends JFrame {
 		
 		//btMultiLocal
 		btMultiLocal.setToolTipText("Play with your friend.");
+		btMultiLocal.setEnabled(false);
 		btMultiLocal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MultiLocal.main(null);
@@ -204,6 +205,7 @@ public class HomePage extends JFrame {
 		
 		//btMultiCustom
 		btMultiCustom.setToolTipText("Play with your friend online.");
+		btMultiCustom.setEnabled(false);
 		btMultiCustom.setBounds(450, 275, 100, 30);
 		desktopPane.add(btMultiCustom);
 		btMultiCustom.setVisible(false);
