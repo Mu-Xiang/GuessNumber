@@ -71,9 +71,13 @@ public class HomePage extends JFrame {
 		JButton btMulti = new JButton("\u591A\u4EBA\u904A\u6232");
 		JButton btSetting = new JButton("\u8A2D\u5B9A");
 		JButton btRank = new JButton("\u6392\u884C\u699C");
+		JButton btExit = new JButton("\u96E2\u958B");
 		JButton btBack = new JButton("<--Back");
 		JButton btSingleSpeed = new JButton("\u55AE\u4EBA\u7AF6\u731C");
 		JButton btSingleAI = new JButton("AI");
+		JButton btMultiLocal = new JButton("\u672C\u6A5F\u591A\u4EBA");
+		JButton btMultiConnect = new JButton("\u591A\u4EBA\u9023\u7DDA");
+		JButton btMultiCustom = new JButton("\u81EA\u8A02");
 		
 		//btSingle
 		btSingle.setToolTipText("Just you and you.");
@@ -83,36 +87,55 @@ public class HomePage extends JFrame {
 				btMulti.setVisible(false);
 				btSetting.setVisible(false);
 				btRank.setVisible(false);
+				btExit.setVisible(false);
 				btBack.setVisible(true);
 				btSingleSpeed.setVisible(true);
 				btSingleAI.setVisible(true);
 			}
 		});
-		btSingle.setBounds(290, 155, 120, 25);
+		btSingle.setBounds(290, 150, 120, 25);
 		desktopPane.add(btSingle);
 		
 		//btMulti
 		btMulti.setToolTipText("Play with your friends.");
 		btMulti.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				btSingle.setVisible(false);
+				btMulti.setVisible(false);
+				btSetting.setVisible(false);
+				btRank.setVisible(false);
+				btExit.setVisible(false);
+				btBack.setVisible(true);
+				btMultiLocal.setVisible(true);
+				btMultiConnect.setVisible(true);
+				btMultiCustom.setVisible(true);
 			}
 		});
-		btMulti.setBounds(290, 210, 120, 25);
+		btMulti.setBounds(290, 200, 120, 25);
 		desktopPane.add(btMulti);
 		
 		//btSetting
-		btSetting.setToolTipText("None");
+		btSetting.setToolTipText("WIP");
 		btSetting.setEnabled(false);
-		btSetting.setBounds(290, 265, 120, 25);
+		btSetting.setBounds(290, 250, 120, 25);
 		desktopPane.add(btSetting);
 		
 		//btRank
-		btRank.setToolTipText("None");
+		btRank.setToolTipText("WIP");
 		btRank.setEnabled(false);
-		btRank.setBounds(290, 320, 120, 25);
+		btRank.setBounds(290, 300, 120, 25);
 		desktopPane.add(btRank);
 		btBack.setVisible(false);
+		
+		//btExit
+		btExit.setToolTipText("Just go!");
+		btExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
+		btExit.setBounds(290, 350, 120, 25);
+		desktopPane.add(btExit);
 		
 		//btBack
 		btBack.addActionListener(new ActionListener() {
@@ -121,9 +144,13 @@ public class HomePage extends JFrame {
 				btMulti.setVisible(true);
 				btSetting.setVisible(true);
 				btRank.setVisible(true);
+				btExit.setVisible(true);
 				btBack.setVisible(false);
 				btSingleSpeed.setVisible(false);
 				btSingleAI.setVisible(false);
+				btMultiLocal.setVisible(false);
+				btMultiConnect.setVisible(false);
+				btMultiCustom.setVisible(false);
 			}
 		});
 		btBack.setBackground(SystemColor.activeCaption);
@@ -133,6 +160,7 @@ public class HomePage extends JFrame {
 		desktopPane.add(btBack);
 		
 		//btSingleTimer
+		btSingleSpeed.setToolTipText("Speed run.");
 		btSingleSpeed.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				SingleSpeed.main(null);
@@ -149,5 +177,35 @@ public class HomePage extends JFrame {
 		btSingleAI.setBounds(450, 275, 100, 30);
 		desktopPane.add(btSingleAI);
 		btSingleAI.setVisible(false);
+		
+		//btMultiLocal
+		btMultiLocal.setToolTipText("Play with your friend.");
+		btMultiLocal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MultiLocal.main(null);
+				dispose();
+			}
+		});
+		btMultiLocal.setBounds(150, 275, 100, 30);
+		desktopPane.add(btMultiLocal);
+		btMultiLocal.setVisible(false);
+		
+		//btMultiConnect
+		btMultiConnect.setToolTipText("WIP");
+		btMultiConnect.setEnabled(false);
+		btMultiConnect.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		btMultiConnect.setBounds(300, 275, 100, 30);
+		desktopPane.add(btMultiConnect);
+		btMultiConnect.setVisible(false);
+		
+		//btMultiCustom
+		btMultiCustom.setToolTipText("Play with your friend online.");
+		btMultiCustom.setBounds(450, 275, 100, 30);
+		desktopPane.add(btMultiCustom);
+		btMultiCustom.setVisible(false);
 	}
 }

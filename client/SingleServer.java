@@ -103,7 +103,6 @@ public class SingleServer {
             s = server.accept();
             ServerThread serverThread = new ServerThread(s);
             serverThread.start();
-            System.out.println("Server Closed.");
         }
 
         System.out.println("Server closed!");
