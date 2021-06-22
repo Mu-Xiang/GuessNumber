@@ -14,6 +14,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import java.awt.SystemColor;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.ImageIcon;
 
@@ -183,7 +184,8 @@ public class HomePage extends JFrame {
 		btMultiLocal.setEnabled(false);
 		btMultiLocal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				MultiLocal.main(null);
+				new Thread(new MultiLocalServerThread()).run();
+				new Thread(new MultiLocalThread()).run();
 				dispose();
 			}
 		});
@@ -209,5 +211,24 @@ public class HomePage extends JFrame {
 		btMultiCustom.setBounds(450, 275, 100, 30);
 		desktopPane.add(btMultiCustom);
 		btMultiCustom.setVisible(false);
+	}
+	
+	private class MultiLocalThread implements Runnable {
+		public void run() {
+			MultiLocal.main(null);
+		}
+	}
+	
+	private class MultiLocalServerThread implements Runnable {
+		public void run() {
+			while (true) {
+				try {
+					MultiLocalServer.main(null);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+		}
 	}
 }

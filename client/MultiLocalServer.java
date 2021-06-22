@@ -53,30 +53,28 @@ class MultiLocalServerThread extends Thread {
 		DataInputStream p2Din = new DataInputStream(p2In);
 		DataOutputStream p2Dout = new DataOutputStream(p2Out);
 		
-		boolean bool = false;
+		boolean bool = true;
 		while (true) {
 			int a = 0, b = 0;
 			int[] temp = new int[4];
 			try {
-				//return timePause boolean
-				p1Dout.writeBoolean(bool);
-				p2Dout.writeBoolean(!bool);
-				
+				if (bool)
+					p1Dout.writeBoolean(true);
+				else
+					p2Dout.writeBoolean(true);
+				System.out.println("send bool");
 				//read number
 				int num[] = new int[4];
 				for (int i = 0; i < 4; i++) {
-					if (!bool)
-						num[i] = p1Din.readInt();
-					else
-						num[i] = p2Din.readInt();
+					num[i] = bool ? p1Din.readInt() : p2Din.readInt();
 					temp[i] = ans[i];
 				}
 				
 				//server print
 				System.out.println("\nAnswer = " + ans[0] + ans[1] + ans[2] + ans[3]);
-				if (!bool) System.out.print(p1Name + " ");
+				if (bool) System.out.print(p1Name + " ");
 				else System.out.print(p2Name + " ");
-				System.out.print("Input = " + num[0] + num[1] + num[2] + num[3]);
+				System.out.print("Input = " + num[0] + num[1] + num[2] + num[3] + "\n");
 				
 				//a & b
 				for (int i = 0; i < 4; i++) {
@@ -94,9 +92,10 @@ class MultiLocalServerThread extends Thread {
                         }
 					}
 				}
+				System.out.println(a + "A" + b + "B");
 				
 				//return a & b
-				if (!bool) {
+				if (bool) {
 					p1Dout.writeInt(a);
 					p1Dout.writeInt(b);
 				} else {
